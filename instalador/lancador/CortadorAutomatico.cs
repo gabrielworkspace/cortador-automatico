@@ -25,8 +25,8 @@ using Microsoft.Win32;
 [assembly: System.Reflection.AssemblyDescription("Cortador Automático - Gabriel Workspace")]
 [assembly: System.Reflection.AssemblyCompany("Gabriel Workspace")]
 [assembly: System.Reflection.AssemblyCopyright("© 2026 Gabriel Workspace")]
-[assembly: System.Reflection.AssemblyVersion("2.0.6.0")]
-[assembly: System.Reflection.AssemblyFileVersion("2.0.6.0")]
+[assembly: System.Reflection.AssemblyVersion("2.0.7.0")]
+[assembly: System.Reflection.AssemblyFileVersion("2.0.7.0")]
 
 static class Programa
 {

@@ -1468,7 +1468,7 @@
       <div class="dica" style="margin-top:8px" id="dspAjustesDica"></div>
       <label class="marcar" style="margin-top:12px">
         <input type="checkbox" id="placaVideo">
-        <div><b>Usar a placa de vídeo pra gerar os cortes</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
+        <div><b>Usar a placa de vídeo (cortes e transcrição)</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
       </label>
     </div>
 
@@ -2436,17 +2436,23 @@
       (r.recomendado === 'leve' ? 'modo leve' : 'processador total') + '. Vale a partir do próximo corte.';
     pintarPlaca(r.placa || {});
   }
-  // placa de video: o programa testa sozinho qual funciona (NVIDIA, AMD ou Intel)
+  // placa de video: o programa testa sozinho NVENC/AMF/QSV (cortes) e CUDA (transcricao)
   function pintarPlaca(p) {
     const caixa = $('placaVideo');
+    const testando = p.achada === 'testando' || p.cuda === 'testando';
+    const temEncoder = p.achada && p.achada !== 'testando';
+    const temCuda = p.cuda && p.cuda !== 'testando';
     caixa.checked = !!p.ligada;
-    caixa.disabled = p.achada === null;
+    caixa.disabled = !testando && !temEncoder && !temCuda;
     $('placaDica').textContent =
-      p.achada === 'testando' ? 'Testando a placa de vídeo...'
-      : p.achada === null ? 'Não achei placa compatível (NVIDIA, AMD ou Intel): os cortes ficam no processador.'
+      testando ? 'Testando a placa de vídeo...'
+      : (!temEncoder && !temCuda) ? 'Não achei placa compatível (NVIDIA, AMD ou Intel): os cortes e a transcrição ficam no processador.'
+      : p.quebrou && temCuda ? 'O encoder ' + p.achada + ' falhou e voltou pro processador; a transcrição segue na ' + p.cuda + ' (CUDA).'
       : p.quebrou ? 'A placa ' + p.achada + ' falhou num corte e o programa voltou pro processador. Desligue e ligue de novo pra tentar outra vez.'
+      : (temEncoder && temCuda) ? 'Encontrei ' + p.cuda + ' (NVENC + CUDA). Acelera tanto os cortes quanto a transcrição.'
+      : temCuda ? 'Encontrei ' + p.cuda + ' (CUDA). Acelera a transcrição na GPU; os cortes continuam no processador (esta placa não tem NVENC).'
       : 'Encontrei a placa ' + p.achada + '. Gera os cortes até 3x mais rápido; a transcrição continua no processador.';
-    if (p.achada === 'testando') setTimeout(carregarDesempenho, 2000);
+    if (testando) setTimeout(carregarDesempenho, 2000);
   }
   $('placaVideo').addEventListener('change', async () => {
     try {

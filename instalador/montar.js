@@ -27,9 +27,12 @@ const IMAGENS = path.join(AQUI, 'imagens');
 
 const PYTHON_VERSAO = '3.12.10';
 const INNO_VERSAO = '6.7.3';
+// FFmpeg 8.0.1 usa NVENC API 13.0 (driver NVIDIA 570+/582.xx, incluindo Pascal/GTX 10xx).
+// O link movel ffmpeg-release-essentials virou 9.1 (NVENC 13.1, exige driver 610+).
+const FFMPEG_VERSAO = '8.0.1';
 const DOWNLOADS = {
   'python-embed.zip': 'https://www.python.org/ftp/python/' + PYTHON_VERSAO + '/python-' + PYTHON_VERSAO + '-embed-amd64.zip',
-  'ffmpeg-essentials.zip': 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip',
+  'ffmpeg-essentials.zip': 'https://github.com/GyanD/codexffmpeg/releases/download/' + FFMPEG_VERSAO + '/ffmpeg-' + FFMPEG_VERSAO + '-essentials_build.zip',
   'yt-dlp.exe': 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe',
   'innosetup.exe': 'https://github.com/jrsoftware/issrc/releases/download/is-' + INNO_VERSAO.replace(/\./g, '_') + '/innosetup-' + INNO_VERSAO + '.exe',
 };

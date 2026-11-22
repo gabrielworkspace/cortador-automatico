@@ -1,9 +1,9 @@
-﻿; Instalador do Cortador Automático (Inno Setup 6).
+; Instalador do Cortador Automático (Inno Setup 6).
 ; Não compile direto: rode  node instalador/montar.js  - ele monta a pasta
 ; "montagem" com tudo que o programa precisa e chama o compilador.
 
 #define Nome "Cortador Automático"
-#define Versao "2.0.6"
+#define Versao "2.0.7"
 #define Marca "Gabriel Workspace"
 #define Exe "CortadorAutomatico.exe"
 #ifndef MONTAGEM

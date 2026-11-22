@@ -991,6 +991,7 @@ function abrirJanela(endereco) {
 }
 
 aovivo.limparSobras();
-// testa a placa de video em segundo plano (meio segundo de video), pra opcao dos Ajustes
+// testa a placa de video em segundo plano (NVENC/AMF/QSV pro corte e CUDA pra transcricao)
 media.garantirFfmpeg().then(({ ffmpeg }) => desempenho.detectarPlaca(ffmpeg)).catch(() => {});
+Promise.resolve().then(() => desempenho.detectarCuda(pipeline.acharPython())).catch(() => {});
 subir(PORTA_INICIAL, 20);

@@ -4,6 +4,7 @@ Transcreve um audio com faster-whisper e grava um JSON com timestamps por palavr
 Reporta progresso em stdout, uma linha JSON por vez, para o Node acompanhar.
 """
 import argparse
+import glob
 import io
 import json
 import os
@@ -19,14 +20,97 @@ def avisar(tipo, **campos):
     print(json.dumps(campos, ensure_ascii=False), flush=True)
 
 
+def registrar_dlls_cuda():
+    """Garante que o ctranslate2 ache cublas64_12.dll / cudnn no Windows."""
+    if sys.platform != "win32":
+        return
+    pastas = []
+    # CUDA Toolkit 12.x instalado no sistema (necessario pro ctranslate2 4.x)
+    cuda_env = os.environ.get("CUDA_PATH")
+    if cuda_env:
+        pastas.append(os.path.join(cuda_env, "bin"))
+    for chave, valor in sorted(os.environ.items(), reverse=True):
+        if chave.startswith("CUDA_PATH_V12") and valor:
+            pastas.append(os.path.join(valor, "bin"))
+    base_nv = os.path.join(os.environ.get("ProgramFiles", r"C:\Program Files"), "NVIDIA GPU Computing Toolkit", "CUDA")
+    if os.path.isdir(base_nv):
+        for v in sorted(glob.glob(os.path.join(base_nv, "v12.*", "bin")), reverse=True):
+            pastas.append(v)
+    # Pacotes pip nvidia-cublas-cu12 / nvidia-cudnn-cu12, se instalados
+    for base in sys.path:
+        if not base or not os.path.isdir(base):
+            continue
+        for d in glob.glob(os.path.join(base, "nvidia", "*", "bin")):
+            pastas.append(d)
+
+    vistos = set()
+    path_atual = os.environ.get("PATH", "")
+    extras = []
+    for d in pastas:
+        norm = os.path.normcase(os.path.abspath(d))
+        if norm in vistos or not os.path.isdir(d):
+            continue
+        vistos.add(norm)
+        try:
+            os.add_dll_directory(d)
+        except Exception:
+            pass
+        extras.append(d)
+    if extras:
+        os.environ["PATH"] = os.pathsep.join(extras) + os.pathsep + path_atual
+
+
+def escolher_compute_type_cuda():
+    """
+    Descobre o melhor tipo numerico pra GPU NVIDIA deste PC.
+    Pascal (sm_61, ex.: GTX 1070 / P104-100) nao suporta float16 no ctranslate2,
+    entao cai naturalmente em int8_float32; Turing/Ampere/Ada/Blackwell usam float16.
+    """
+    registrar_dlls_cuda()
+    import ctranslate2
+    if ctranslate2.get_cuda_device_count() <= 0:
+        return None
+    suportados = set(ctranslate2.get_supported_compute_types("cuda"))
+    for ct in ("float16", "int8_float16", "int8_float32", "int8", "float32"):
+        if ct in suportados:
+            return ct
+    return None
+
+
+def testar_cuda():
+    """Modo rapido (--testar-cuda) chamado pelo Node pra conferir se a GPU funciona de verdade."""
+    try:
+        ct = escolher_compute_type_cuda()
+        if not ct:
+            print(json.dumps({"cuda": False, "motivo": "sem dispositivo cuda"}, ensure_ascii=False))
+            return
+        import ctranslate2
+        print(json.dumps({
+            "cuda": True,
+            "dispositivos": ctranslate2.get_cuda_device_count(),
+            "compute_type": ct,
+        }, ensure_ascii=False))
+    except Exception as e:
+        print(json.dumps({"cuda": False, "motivo": str(e)[:200]}, ensure_ascii=False))
+
+
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--audio", required=True)
-    p.add_argument("--saida", required=True)
+    p.add_argument("--audio", required=False)
+    p.add_argument("--saida", required=False)
     p.add_argument("--modelo", default="small")
     p.add_argument("--idioma", default="pt")  # o programa e pra cortes brasileiros
     p.add_argument("--duracao", type=float, default=0.0)
+    p.add_argument("--testar-cuda", action="store_true")
     args = p.parse_args()
+
+    if args.testar_cuda:
+        testar_cuda()
+        return
+
+    if not args.audio or not args.saida:
+        avisar("erro", msg="Parametros --audio e --saida sao obrigatorios.")
+        sys.exit(2)
 
     try:
         from faster_whisper import WhisperModel
@@ -59,16 +143,38 @@ def main():
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "modelos"
     )
 
-    # int8 no CPU: bem mais rapido e cabe folgado na RAM.
-    modelo = WhisperModel(
-        args.modelo,
-        device="cpu",
-        compute_type="int8",
-        cpu_threads=threads,
-        download_root=pasta_modelos,
-    )
+    # Quando a placa de video esta ligada e o PC tem GPU NVIDIA com CUDA,
+    # carrega o Whisper na GPU (em Pascal sm_61 como P104-100/GTX 1070 usa
+    # int8_float32; em GPUs mais novas usa float16). Se falhar, cai pro CPU.
+    modelo = None
+    usou_cuda = False
+    if os.environ.get("USAR_GPU") == "1":
+        try:
+            ct = escolher_compute_type_cuda()
+            if ct:
+                avisar("progresso", pct=3, msg="Carregando o modelo na placa de video (CUDA/%s)..." % ct)
+                modelo = WhisperModel(
+                    args.modelo,
+                    device="cuda",
+                    compute_type=ct,
+                    download_root=pasta_modelos,
+                )
+                usou_cuda = True
+        except Exception as e:
+            avisar("progresso", pct=4, msg="CUDA indisponivel (%s), usando o processador..." % str(e)[:120])
+            modelo = None
 
-    avisar("progresso", pct=6, msg="Ouvindo o video inteiro...")
+    if modelo is None:
+        # int8 no CPU: bem mais rapido e cabe folgado na RAM.
+        modelo = WhisperModel(
+            args.modelo,
+            device="cpu",
+            compute_type="int8",
+            cpu_threads=threads,
+            download_root=pasta_modelos,
+        )
+
+    avisar("progresso", pct=6, msg="Ouvindo o video inteiro%s..." % (" (GPU)" if usou_cuda else ""))
 
     opcoes = dict(
         language=(None if args.idioma == "auto" else args.idioma),
