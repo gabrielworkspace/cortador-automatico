@@ -13,7 +13,7 @@ const { URL } = require('url');
 const pastas = require('./pastas');
 const desempenho = require('./desempenho');
 
-const { processar, refazerClipe, extrairMais, fontsdirRelativo } = require('./pipeline');
+const { processar, refazerClipe, extrairMais, fontsdirRelativo, acharPython } = require('./pipeline');
 const legenda = require('./legenda');
 const media = require('./media');
 const baixador = require('./baixar');
@@ -993,6 +993,7 @@ function abrirJanela(endereco) {
 }
 
 aovivo.limparSobras();
-// testa a placa de video em segundo plano (meio segundo de video), pra opcao dos Ajustes
-media.garantirFfmpeg().then(({ ffmpeg }) => desempenho.detectarPlaca(ffmpeg)).catch(() => {});
+// testa a placa de video em segundo plano (NVENC/AMF/QSV pro corte e CUDA pra transcricao)
+media.garantirFfmpeg().then(({ ffmpeg }) => desempenho.detectarPlaca(ffmpeg)).catch(() => desempenho.detectarPlaca(null));
+Promise.resolve().then(() => desempenho.detectarCuda(acharPython())).catch(() => desempenho.detectarCuda(null));
 subir(PORTA_INICIAL, 20);

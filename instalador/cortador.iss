@@ -1,4 +1,4 @@
-﻿; Instalador do Cortador Automático (Inno Setup 6).
+; Instalador do Cortador Automático (Inno Setup 6).
 ; Não compile direto: rode  node instalador/montar.js  - ele monta a pasta
 ; "montagem" com tudo que o programa precisa e chama o compilador.
 

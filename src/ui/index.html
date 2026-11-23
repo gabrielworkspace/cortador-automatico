@@ -1505,7 +1505,7 @@
       <div class="dica" style="margin-top:8px" id="dspAjustesDica"></div>
       <label class="marcar" style="margin-top:12px">
         <input type="checkbox" id="placaVideo">
-        <div><b>Usar a placa de vídeo pra gerar os cortes</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
+        <div><b>Usar a placa de vídeo (cortes e transcrição)</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
       </label>
     </div>
 
@@ -2498,17 +2498,30 @@
       (r.recomendado === 'leve' ? 'modo leve' : 'processador total') + '. Vale a partir do próximo corte.';
     pintarPlaca(r.placa || {});
   }
-  // placa de video: o programa testa sozinho qual funciona (NVIDIA, AMD ou Intel)
+  // placa de video: mostra em uma linha a GPU detectada e a sigla do corte/transcricao
   function pintarPlaca(p) {
     const caixa = $('placaVideo');
+    const testandoEnc = p.achada === 'testando';
+    const testandoCuda = p.cuda === 'testando';
+    const testando = testandoEnc || testandoCuda;
+    const temEncoder = p.achada && p.achada !== 'testando';
+    const temCuda = p.cuda && p.cuda !== 'testando';
+    const nome = (temCuda ? p.cuda : null) || p.gpu || (temEncoder ? p.achada : null);
     caixa.checked = !!p.ligada;
-    caixa.disabled = p.achada === null;
-    $('placaDica').textContent =
-      p.achada === 'testando' ? 'Testando a placa de vídeo...'
-      : p.achada === null ? 'Não achei placa compatível (NVIDIA, AMD ou Intel): os cortes ficam no processador.'
-      : p.quebrou ? 'A placa ' + p.achada + ' falhou num corte e o programa voltou pro processador. Desligue e ligue de novo pra tentar outra vez.'
-      : 'Encontrei a placa ' + p.achada + '. Gera os cortes até 3x mais rápido; a transcrição continua no processador.';
-    if (p.achada === 'testando') setTimeout(carregarDesempenho, 2000);
+    caixa.disabled = !testando && !temEncoder && !temCuda;
+
+    let texto;
+    if (testando) {
+      texto = nome ? 'GPU detectada: ' + nome + ' · Verificando...' : 'Verificando GPU...';
+    } else if (!temEncoder && !temCuda) {
+      texto = 'Nenhuma GPU compatível · Transcrição: CPU · Corte: CPU';
+    } else {
+      const corte = p.quebrou ? 'CPU' : (p.sigla || 'CPU');
+      const transc = temCuda ? 'CUDA' : 'CPU';
+      texto = 'GPU detectada: ' + nome + ' · Transcrição: ' + transc + ' · Corte: ' + corte;
+    }
+    $('placaDica').textContent = texto;
+    if (testando) setTimeout(carregarDesempenho, 1000);
   }
   $('placaVideo').addEventListener('change', async () => {
     try {

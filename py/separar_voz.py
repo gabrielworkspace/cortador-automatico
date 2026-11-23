@@ -40,16 +40,28 @@ def main():
 
     avisar("progresso", pct=3, msg="Carregando o modelo de separacao (%s)..." % args.modelo)
 
-    # Em CPU o demucs usa todos os nucleos por padrao e trava a maquina.
-    # Deixa um livre pra maquina continuar respondendo.
-    nucleos = max(1, (os.cpu_count() or 2) - 1)
-    torch.set_num_threads(nucleos)
+    usar_gpu = os.environ.get("USAR_GPU") == "1" and torch.cuda.is_available()
+    dispositivo = "cuda" if usar_gpu else "cpu"
+    if dispositivo == "cpu":
+        # Em CPU o demucs usa todos os nucleos por padrao e trava a maquina.
+        # Deixa um livre pra maquina continuar respondendo.
+        nucleos = max(1, (os.cpu_count() or 2) - 1)
+        torch.set_num_threads(nucleos)
 
     try:
-        sep = Separator(model=args.modelo, device="cpu", progress=True, jobs=1)
+        sep = Separator(model=args.modelo, device=dispositivo, progress=True, jobs=1)
     except Exception as e:
-        avisar("erro", msg="nao consegui carregar o modelo: %s" % e)
-        sys.exit(3)
+        if dispositivo == "cuda":
+            nucleos = max(1, (os.cpu_count() or 2) - 1)
+            torch.set_num_threads(nucleos)
+            try:
+                sep = Separator(model=args.modelo, device="cpu", progress=True, jobs=1)
+            except Exception as e2:
+                avisar("erro", msg="nao consegui carregar o modelo: %s" % e2)
+                sys.exit(3)
+        else:
+            avisar("erro", msg="nao consegui carregar o modelo: %s" % e)
+            sys.exit(3)
 
     avisar("progresso", pct=10, msg="Separando voz e musica (demora)...")
     try:
