@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cortador Automático</title>
+<title>AUTOCORTES Z</title>
 <link rel="icon" type="image/png" href="/ui/icone.png">
 <script src="/ui/lucide.js"></script>
 <style>
@@ -839,7 +839,7 @@
 <body data-modo="fluxo">
 <div class="topo">
   <div class="marca-logo"><i data-lucide="scissors" class="i"></i></div>
-  <h1>Cortador Automático</h1>
+  <h1>AUTOCORTES Z</h1>
   <form class="link-topo" id="formLinkTopo" autocomplete="off">
     <i data-lucide="link-2" class="i"></i>
     <input type="text" id="linkTopo" placeholder="Cole aqui o link da live ou do vídeo · Kick, Twitch ou YouTube" aria-label="Link da live ou do vídeo">
@@ -1540,10 +1540,9 @@
     <div class="grupo assinatura">
       <img src="/ui/icone.png" alt="">
       <div>
-        <b>Cortador Automático</b>
-        <span>por <b>Gabriel Workspace</b></span>
-        <a href="https://www.instagram.com/gabriel.workspace/" target="_blank" rel="noopener">Instagram @gabriel.workspace</a>
-        <a href="https://gabrielworkspace.github.io/cortador-automatico/" target="_blank" rel="noopener">Site e versão nova</a>
+        <b>AUTOCORTES Z</b>
+        <span>por <b>OZBITS</b></span>
+        <a href="https://github.com/OZBITS/autocortes-z" target="_blank" rel="noopener">GitHub do projeto</a>
         <span class="ia">A IA pode cometer falhas. Confira sempre antes de postar.</span>
       </div>
     </div>
@@ -1720,8 +1719,8 @@
         return await fetchOriginal(recurso, opcoes);
       } catch (e2) {
         if (e2 && e2.name === 'AbortError') throw e2;
-        throw new Error('A janela perdeu a conexão com o programa. Feche o Cortador Automático e abra de novo. ' +
-          'Se continuar, o antivírus pode estar bloqueando: libere a pasta do Cortador Automático nele.');
+        throw new Error('A janela perdeu a conexão com o programa. Feche o AUTOCORTES Z e abra de novo. ' +
+          'Se continuar, o antivírus pode estar bloqueando: libere a pasta do AUTOCORTES Z nele.');
       }
     }
   };
@@ -1749,7 +1748,7 @@
 
   // ------------------------------------------------------------ estado
   // Chave nova: nada dos ajustes da versao antiga vem junto
-  const LEMBRAR = 'cortador.automatico.v1';
+  const LEMBRAR = 'autocortes.z.v1';
   let arquivo = null, duracaoVideo = 0, pastaSaida = null;
   let projetoAtual = null, processandoAgora = false;
   let trechoFluxo = null; // { inicio, fim, modo } marcado antes de gerar, so vale pro video escolhido
@@ -2565,7 +2564,7 @@
   $('discos').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-raiz]');
     if (!b || b.getAttribute('aria-pressed') === 'true') return;
-    mudarPasta({ pasta: b.dataset.raiz + 'CortadorAutomatico' });
+    mudarPasta({ pasta: b.dataset.raiz + 'AutocortesZ' });
   });
   $('btnEscolherPasta').addEventListener('click', async () => {
     statusPasta('Escolha a pasta na janela do Windows...', '');
@@ -3041,7 +3040,7 @@
   let tituloOriginal = document.title, piscando = null;
   function piscarTitulo() {
     clearTimeout(piscando);
-    document.title = '✂ Clipe pronto! · Cortador Automático';
+    document.title = '✂ Clipe pronto! · AUTOCORTES Z';
     piscando = setTimeout(() => { document.title = tituloOriginal; }, 5000);
   }
 

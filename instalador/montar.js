@@ -1,13 +1,13 @@
 'use strict';
 /**
- * Monta o instalador do Cortador Automatico pra Windows.
+ * Monta o instalador do AUTOCORTES Z pra Windows.
  *
  *     node instalador/montar.js
  *
  * Junta numa pasta so (instalador/montagem) tudo que o programa precisa pra
  * rodar num PC que nao tem nada instalado - Node, Python com o faster-whisper,
  * ffmpeg, yt-dlp e o modelo "small" - compila o .exe que abre o programa e
- * gera instalador/dist/Instalar-Cortador-Automatico.exe com o Inno Setup.
+ * gera instalador/dist/Instalar-AUTOCORTES-Z.exe com o Inno Setup.
  *
  * O que vem da internet (Python embutido, ffmpeg, yt-dlp, Inno Setup) fica
  * guardado em instalador/cache pra proxima vez.
@@ -198,19 +198,19 @@ function montarModelo() {
 }
 
 function montarLancador() {
-  passo('Compilando o CortadorAutomatico.exe');
+  passo('Compilando o AutocortesZ.exe');
   rodar(acharCsc(), [
     '/nologo', '/target:winexe', '/optimize+', '/platform:anycpu',
     '/win32icon:' + path.join(IMAGENS, 'icone.ico'),
     '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll', '/r:System.Management.dll',
-    '/out:' + path.join(MONTAGEM, 'CortadorAutomatico.exe'),
-    path.join(AQUI, 'lancador', 'CortadorAutomatico.cs'),
+    '/out:' + path.join(MONTAGEM, 'AutocortesZ.exe'),
+    path.join(AQUI, 'lancador', 'AutocortesZ.cs'),
   ]);
 }
 
 function compilarInstalador() {
   passo('Gerando o instalador (demora uns minutos: comprime quase 1 GB)');
-  const iss = path.join(AQUI, 'cortador.iss');
+  const iss = path.join(AQUI, 'autocortes.iss');
   // O Inno so le acento direito se o .iss tiver a marca de UTF-8 (BOM).
   const texto = fs.readFileSync(iss, 'utf8');
   if (texto.charCodeAt(0) !== 0xfeff) fs.writeFileSync(iss, '\ufeff' + texto, 'utf8');
@@ -248,7 +248,7 @@ function main() {
 
   if (soMontar) return;
   compilarInstalador();
-  const exe = path.join(DIST, 'Instalar-Cortador-Automatico.exe');
+  const exe = path.join(DIST, 'Instalar-AUTOCORTES-Z.exe');
   console.log('\nPronto: ' + exe + ' (' + Math.round(fs.statSync(exe).size / 1048576) + ' MB)');
 }
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>AUTOCORTES Z</title>
+<defs>
+<linearGradient id="fundo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f3a"/><stop offset="1" stop-color="#0c0e1c"/></linearGradient>
+<linearGradient id="fogo" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d00"/><stop offset="1" stop-color="#ff9100"/></linearGradient>
+<linearGradient id="brasa" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffab00"/><stop offset="1" stop-color="#ffec82"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="118" fill="url(#fundo)"/>
+<path d="M256,48 C262,112 352,150 352,240 C352,324 310,376 256,376 C202,376 160,324 160,240 C160,186 196,166 206,122 C230,140 248,104 256,48 Z" fill="url(#fogo)"/>
+<path d="M256,176 C260,226 312,248 312,304 C312,346 288,370 256,370 C224,370 200,346 200,304 C200,264 236,242 256,176 Z" fill="url(#brasa)"/>
+<g fill="#fff">
+<polygon points="241.5,290.8 279.3,276.2 199.5,105.2 188.5,96.2 186.4,110.2"/>
+<polygon points="246.1,275.8 265.9,268.2 298.7,353.7 278.9,361.2"/>
+<circle cx="303.9" cy="396.9" r="37.4" fill="none" stroke="#fff" stroke-width="18.5"/>
+<polygon points="232.7,276.2 270.5,290.8 325.6,110.2 323.5,96.2 312.5,105.2"/>
+<polygon points="246.1,268.2 265.9,275.8 233.1,361.2 213.3,353.7"/>
+<circle cx="208.1" cy="396.9" r="37.4" fill="none" stroke="#fff" stroke-width="18.5"/>
+</g>
+<circle cx="256" cy="272" r="10" fill="#1b1f3a"/>
+</svg>

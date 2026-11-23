@@ -1,7 +1,8 @@
-# Cortador Automático
+# AUTOCORTES Z
 
-**por Gabriel Workspace** · Instagram [@gabriel.workspace](https://www.instagram.com/gabriel.workspace/) ·
-[Baixar o instalador](https://gabrielworkspace.github.io/cortador-automatico/)
+<p align="center"><img src="instalador/imagens/logo.svg" width="120" alt="AUTOCORTES Z"></p>
+
+**por OZBITS** · [Baixar o instalador](https://github.com/OZBITS/autocortes-z/releases/latest)
 
 Corta vídeo e live da **Kick, Twitch e YouTube** em clipes verticais (9:16)
 prontos para TikTok, Reels e Shorts — tanto **live que já acabou (VOD)** quanto
@@ -48,7 +49,7 @@ node src/server.js     # ou direto (porta 4321)
 
 Precisa de Node 22+, ffmpeg, yt-dlp e Python com faster-whisper
 (`instalar.bat` cuida disso). Sem `DADOS` definido, os arquivos vão para
-`D:\CortadorAutomatico` quando o D: existe.
+`D:\AutocortesZ` quando o D: existe.
 
 ## Código
 
@@ -65,9 +66,9 @@ Precisa de Node 22+, ffmpeg, yt-dlp e Python com faster-whisper
 
 ## Instalador
 
-O instalador (`Instalar-Cortador-Automatico.exe`) é montado pelo GitHub
+O instalador (`Instalar-AUTOCORTES-Z.exe`) é montado pelo GitHub
 Actions a partir deste código ([.github/workflows/instalador.yml](.github/workflows/instalador.yml))
-e publicado em [Releases](https://github.com/gabrielworkspace/cortador-automatico/releases).
+e publicado em [Releases](https://github.com/OZBITS/autocortes-z/releases).
 Ele traz Node, Python com faster-whisper, ffmpeg, yt-dlp e os modelos de fala:
 quem instala não precisa de mais nada. Pra montar no próprio PC:
 `node instalador/montar.js`.
@@ -80,20 +81,18 @@ público de uma live (dá pra desligar) e atualizar o baixador de vídeos (yt-dl
 quando um download falha. Os vídeos e os cortes ficam só no computador de quem
 usa.
 
-## Política de assinatura de código
+## Instaladores
 
-- Autor e aprovador das versões: Gabriel Workspace ([gabrielworkspace](https://github.com/gabrielworkspace) no GitHub, [@gabriel.workspace](https://www.instagram.com/gabriel.workspace/) no Instagram)
-- Os instaladores publicados são montados só pelo GitHub Actions deste
-  repositório, a partir do código público.
-- O instalador usa a SignPath Foundation pra assinatura de código.
-  Free code signing provided by [SignPath.io](https://signpath.io/),
-  certificate by [SignPath Foundation](https://signpath.org/).
+Os instaladores publicados são montados só pelo GitHub Actions deste
+repositório, a partir do código público. Autor e responsável pelas versões:
+OZBITS ([OZBITS](https://github.com/OZBITS) no GitHub).
 
 ## Licença
 
 [MIT](LICENSE). O instalador inclui programas de terceiros, cada um com a sua
 licença: Node.js, Python, faster-whisper, ffmpeg e yt-dlp.
 
-O nome "Cortador Automático", o nome "Gabriel Workspace" e o logo **não fazem
-parte da licença**: versões feitas a partir deste código precisam de outro nome
-e outro logo. Detalhes em [MARCA.md](MARCA.md).
+Este projeto nasceu do código aberto *Cortador Automático* (MIT). O aviso de
+copyright original está mantido no [LICENSE](LICENSE), como a licença exige.
+O nome "AUTOCORTES Z", "OZBITS" e o logo (a tesoura em chamas) são do OZBITS:
+detalhes em [MARCA.md](MARCA.md).

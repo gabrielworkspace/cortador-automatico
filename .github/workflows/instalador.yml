@@ -1,13 +1,11 @@
-# Monta o instalador do Cortador Automatico no proprio GitHub, a partir do
+# Monta o instalador do AUTOCORTES Z no proprio GitHub, a partir do
 # codigo publico, e publica no Releases.
 #
 # Roda sozinho quando sai uma tag de versao (ex.: git tag v2.0.1 && git push
 # origin v2.0.1) ou na mao, pela aba Actions ("Run workflow").
 #
-# Montar aqui, e nao no PC de alguem, e o que permite pedir assinatura gratis
-# de codigo aberto (SignPath Foundation): da pra provar que o .exe saiu deste
-# codigo. Quando a SignPath aprovar o projeto, o passo de assinatura entra
-# entre "Montar o instalador" e "Publicar no Releases".
+# Montar aqui, e nao no PC de alguem, permite provar que o .exe saiu deste
+# codigo publico.
 
 name: Instalador
 
@@ -53,8 +51,8 @@ jobs:
       - name: Guardar o instalador
         uses: actions/upload-artifact@v4
         with:
-          name: Instalar-Cortador-Automatico
-          path: instalador/dist/Instalar-Cortador-Automatico.exe
+          name: Instalar-AUTOCORTES-Z
+          path: instalador/dist/Instalar-AUTOCORTES-Z.exe
           retention-days: 14
 
       - name: Publicar no Releases
@@ -64,10 +62,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = '${{ github.ref_name }}'
-          $exe = 'instalador/dist/Instalar-Cortador-Automatico.exe'
+          $exe = 'instalador/dist/Instalar-AUTOCORTES-Z.exe'
           gh release view $tag 2>$null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $exe --clobber
           } else {
-            gh release create $tag $exe --title "Cortador Automatico $tag" --notes "Baixe o Instalar-Cortador-Automatico.exe e instale. Tudo vem dentro: nao precisa instalar mais nada."
+            gh release create $tag $exe --title "AUTOCORTES Z $tag" --notes "Baixe o Instalar-AUTOCORTES-Z.exe e instale. Tudo vem dentro: nao precisa instalar mais nada."
           }

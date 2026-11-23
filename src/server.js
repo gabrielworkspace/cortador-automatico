@@ -187,7 +187,7 @@ function paginaLogin(erro) {
     '.erro{color:#fca5a5;font-size:13px;margin-bottom:12px}' +
     '</style></head><body>' +
     '<form method="POST" action="/api/login">' +
-    '<h1>✂️ Cortador Automático</h1>' +
+    '<h1>✂️ AUTOCORTES Z</h1>' +
     (erro ? '<div class="erro">Senha incorreta.</div>' : '') +
     '<input type="password" name="senha" placeholder="Senha" autofocus required>' +
     '<button type="submit">Entrar</button>' +
@@ -288,7 +288,7 @@ function janelaDoWindows(linhasDoDialogo, propriedade) {
 function escolherPastaNativa() {
   return janelaDoWindows([
     '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
-    '$d.Description = "Escolha onde o Cortador Automatico vai salvar os cortes"',
+    '$d.Description = "Escolha onde o AUTOCORTES Z vai salvar os cortes"',
     '$d.ShowNewFolderButton = $true',
   ], 'SelectedPath').then((r) => r.caminho);
 }
@@ -623,7 +623,7 @@ const servidor = http.createServer(async (req, res) => {
           // canal e titulo do link, pro titulo dos cortes sair com o nome do streamer e do jogo
           try {
             const info = await baixador.espiar(url);
-            fs.writeFileSync(caminho + '.cortador.json', JSON.stringify({ titulo: info.titulo, canal: info.canal, url }), 'utf8');
+            fs.writeFileSync(caminho + '.autocortes.json', JSON.stringify({ titulo: info.titulo, canal: info.canal, url }), 'utf8');
           } catch (_) { /* sem isso o titulo so perde o nome do canal */ }
           return caminho;
         })
@@ -956,7 +956,7 @@ function subir(porta, tentativas) {
   servidor.once('listening', () => {
     const endereco = 'http://127.0.0.1:' + porta;
     console.log('');
-    console.log('  Cortador automatico rodando em ' + endereco);
+    console.log('  AUTOCORTES Z rodando em ' + endereco);
 
     if (NA_REDE) {
       for (const ip of enderecosDaRede()) {

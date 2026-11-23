@@ -18,7 +18,7 @@ const path = require('path');
 const SESSOES = {
   padrao: {
     id: 'padrao',
-    nome: 'Cortador Automático',
+    nome: 'AUTOCORTES Z',
     descricao: 'Cortes de live e vídeo · Kick, Twitch e YouTube',
     pasta: 'cortes',
     // Live de jogo quase sempre e webcam + gameplay: o rosto em cima e o jogo

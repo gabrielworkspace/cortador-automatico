@@ -482,12 +482,12 @@ function semPalavras(c) {
 /** A copy do post: titulo que promete algo, sempre baseado no que foi dito. */
 /**
  * Canal e titulo do video, guardados junto dele quando foi baixado por link
- * (<video>.cortador.json). Video do PC nao tem: fica so o nome do arquivo.
+ * (<video>.autocortes.json). Video do PC nao tem: fica so o nome do arquivo.
  */
 function contextoDoVideo(video) {
   const nome = path.basename(video, path.extname(video)).replace(/s*[[^]]+]s*$/, '');
   let info = {};
-  try { info = JSON.parse(fs.readFileSync(video + '.cortador.json', 'utf8')) || {}; } catch (_) {}
+  try { info = JSON.parse(fs.readFileSync(video + '.autocortes.json', 'utf8')) || {}; } catch (_) {}
   return { texto: [info.titulo, nome].filter(Boolean).join(' · '), canal: info.canal || '' };
 }
 

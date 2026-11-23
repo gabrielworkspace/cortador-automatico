@@ -1,4 +1,4 @@
-// Cortador Automatico - o .exe do atalho no desktop.
+// AUTOCORTES Z - o .exe do atalho no desktop.
 //
 // Sobe o servidor (node) escondido, sem janela preta, abre a tela do programa
 // numa janela propria do Edge (modo app, sem barra de endereco) e, quando essa
@@ -20,22 +20,22 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
-[assembly: System.Reflection.AssemblyTitle("Cortador Automático")]
-[assembly: System.Reflection.AssemblyProduct("Cortador Automático")]
-[assembly: System.Reflection.AssemblyDescription("Cortador Automático - Gabriel Workspace")]
-[assembly: System.Reflection.AssemblyCompany("Gabriel Workspace")]
-[assembly: System.Reflection.AssemblyCopyright("© 2026 Gabriel Workspace")]
+[assembly: System.Reflection.AssemblyTitle("AUTOCORTES Z")]
+[assembly: System.Reflection.AssemblyProduct("AUTOCORTES Z")]
+[assembly: System.Reflection.AssemblyDescription("AUTOCORTES Z - OZBITS")]
+[assembly: System.Reflection.AssemblyCompany("OZBITS")]
+[assembly: System.Reflection.AssemblyCopyright("© 2026 OZBITS")]
 [assembly: System.Reflection.AssemblyVersion("2.0.7.0")]
 [assembly: System.Reflection.AssemblyFileVersion("2.0.7.0")]
 
 static class Programa
 {
-    const string NOME = "Cortador Automático";
+    const string NOME = "AUTOCORTES Z";
 
     static string pastaApp;       // onde o programa foi instalado
-    static string pastaLocal;     // %LOCALAPPDATA%\CortadorAutomatico: registro, perfil da janela, endereco
+    static string pastaLocal;     // %LOCALAPPDATA%\AutocortesZ: registro, perfil da janela, endereco
     static string perfilJanela;   // perfil do Edge so nosso: fechar a janela = fechar o programa
-    static string pastaDados;     // Videos\Cortador Automatico: cortes e videos baixados
+    static string pastaDados;     // Videos\AUTOCORTES Z: cortes e videos baixados
     static string endereco;
     static Process servidor;
     static IntPtr job = IntPtr.Zero;
@@ -51,15 +51,15 @@ static class Programa
         Application.SetCompatibleTextRenderingDefault(false);
 
         pastaApp = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
-        pastaLocal = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CortadorAutomatico");
+        pastaLocal = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AutocortesZ");
         perfilJanela = Path.Combine(pastaLocal, "janela");
         string videos = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
         if (string.IsNullOrEmpty(videos)) videos = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Videos");
-        pastaDados = Path.Combine(videos, "Cortador Automatico");
+        pastaDados = Path.Combine(videos, "AUTOCORTES Z");
         string arquivoEndereco = Path.Combine(pastaLocal, "endereco.txt");
 
         bool primeiro;
-        using (var trava = new Mutex(true, "CortadorAutomatico", out primeiro)) // o instalador espera ele fechar (AppMutex)
+        using (var trava = new Mutex(true, "AutocortesZ", out primeiro)) // o instalador espera ele fechar (AppMutex)
         {
             if (!primeiro)
             {
@@ -294,7 +294,7 @@ static class Programa
     static void CriarIcone()
     {
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Abrir o Cortador", null, (s, e) => AbrirJanela(endereco));
+        menu.Items.Add("Abrir o AUTOCORTES Z", null, (s, e) => AbrirJanela(endereco));
         menu.Items.Add("Abrir a pasta dos cortes", null, (s, e) => AbrirPasta());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Fechar o programa", null, (s, e) => { FecharJanelas(); Encerrar(true); });

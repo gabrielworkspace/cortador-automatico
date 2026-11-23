@@ -1,19 +1,15 @@
 # Nome e marca
 
-O **código** do Cortador Automático é aberto, sob a licença [MIT](LICENSE).
+O **código** do AUTOCORTES Z é aberto, sob a licença [MIT](LICENSE).
 
-O **nome "Cortador Automático"**, o **nome "Gabriel Workspace"**, o **logo** (a tesoura azul) e a identidade visual do programa e do site **não fazem parte da licença MIT** e continuam sendo do Gabriel Workspace.
+O **nome "AUTOCORTES Z"**, o nome **OZBITS** e o **logo** (a tesoura em chamas) não fazem parte da licença MIT e continuam sendo do OZBITS.
 
-Isso quer dizer que, se você fizer uma versão própria a partir deste código:
+Se você fizer uma versão própria a partir deste código:
 
 - dê **outro nome** a ela e use **outro logo**;
-- não diga nem dê a entender que é o Cortador Automático oficial ou que é feita, apoiada ou aprovada pelo Gabriel Workspace;
+- não diga nem dê a entender que é o AUTOCORTES Z oficial ou que é feita, apoiada ou aprovada pelo OZBITS;
 - mantenha o aviso de copyright da licença MIT, como ela exige.
 
-O Cortador Automático oficial é grátis e só sai destes lugares:
+O AUTOCORTES Z oficial só sai deste lugar:
 
-- Site: https://gabrielworkspace.github.io/cortador-automatico/
-- GitHub: https://github.com/gabrielworkspace/cortador-automatico
-- Instagram: [@gabriel.workspace](https://www.instagram.com/gabriel.workspace/)
-
-Se encontrar uma cópia usando o nome ou o logo, sendo vendida ou pedindo cadastro, ela não é nossa.
+- GitHub: https://github.com/OZBITS/autocortes-z

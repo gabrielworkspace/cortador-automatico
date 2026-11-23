@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 >nul
-title Instalador - Cortador Automatico
+title Instalador - AUTOCORTES Z
 cd /d "%~dp0"
 
 echo.
 echo  ============================================================
-echo    INSTALADOR DO CORTADOR AUTOMATICO
+echo    INSTALADOR DO AUTOCORTES Z
 echo  ============================================================
 echo.
 echo   Isso instala o que o programa precisa pra funcionar:
@@ -56,8 +56,8 @@ for %%V in (312 311 310) do (
   if not defined PY if exist "C:\Python%%V\python.exe" set "PY=C:\Python%%V\python.exe"
 )
 if not defined PY (
-  py -3.12 -c "import sys; print(sys.executable)" > "%TEMP%\cortador-py.txt" 2>nul
-  if not errorlevel 1 set /p PY=<"%TEMP%\cortador-py.txt"
+  py -3.12 -c "import sys; print(sys.executable)" > "%TEMP%\autocortes-py.txt" 2>nul
+  if not errorlevel 1 set /p PY=<"%TEMP%\autocortes-py.txt"
 )
 if not defined PY goto sempython
 echo        Achei: %PY%

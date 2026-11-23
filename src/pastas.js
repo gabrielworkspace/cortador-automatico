@@ -9,8 +9,8 @@
  *
  * Qual pasta vale, nesta ordem:
  *   1. a que a pessoa escolheu nos Ajustes (config.json)
- *   2. a variavel DADOS (o programa instalado aponta pra Videos\Cortador Automatico)
- *   3. D:\CortadorAutomatico, se o D: existir (o C: costuma viver cheio)
+ *   2. a variavel DADOS (o programa instalado aponta pra Videos\AUTOCORTES Z)
+ *   3. D:\AutocortesZ, se o D: existir (o C: costuma viver cheio)
  *   4. a propria pasta do programa
  */
 
@@ -23,8 +23,8 @@ const RAIZ = path.join(__dirname, '..');
 /** O arquivo de configuracao fica fora da pasta de dados: ela pode mudar de lugar. */
 function arquivoConfig() {
   const base = process.platform === 'win32'
-    ? path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'CortadorAutomatico')
-    : path.join(os.homedir(), '.cortador-automatico');
+    ? path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'AutocortesZ')
+    : path.join(os.homedir(), '.autocortes-z');
   return path.join(base, 'config.json');
 }
 
@@ -41,7 +41,7 @@ function gravarConfig(cfg) {
 /** A pasta de dados quando nada foi escolhido. */
 function padrao() {
   if (process.env.DADOS) return process.env.DADOS;
-  if (process.platform === 'win32' && fs.existsSync('D:/')) return 'D:\\CortadorAutomatico';
+  if (process.platform === 'win32' && fs.existsSync('D:/')) return 'D:\\AutocortesZ';
   return RAIZ;
 }
 
@@ -73,7 +73,7 @@ function mudar(pasta) {
   if (!path.isAbsolute(alvo)) throw new Error('Escolha uma pasta completa, com o disco (ex.: E:\\Cortes).');
   try {
     fs.mkdirSync(alvo, { recursive: true });
-    const teste = path.join(alvo, '.teste-cortador-' + Date.now());
+    const teste = path.join(alvo, '.teste-autocortes-' + Date.now());
     fs.writeFileSync(teste, 'ok');
     fs.unlinkSync(teste);
   } catch (e) {

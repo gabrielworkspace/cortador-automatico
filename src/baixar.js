@@ -15,7 +15,7 @@ const pastas = require('./pastas'); // a pasta de videos baixados muda quando a 
 // novo. Da pra apontar um binario proprio pela variavel YTDLP_PATH.
 // Copia reserva baixada pelo proprio programa quando o yt-dlp some (o
 // antivirus costuma apagar o yt-dlp.exe achando que e virus).
-const PASTA_RESERVA = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'CortadorAutomatico', 'bin');
+const PASTA_RESERVA = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'AutocortesZ', 'bin');
 const YTDLP_RESERVA = path.join(PASTA_RESERVA, 'yt-dlp.exe');
 const URL_YTDLP = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe';
 
@@ -78,8 +78,8 @@ async function garantirYtDlp() {
       if (await testar(YTDLP_RESERVA)) { YTDLP = YTDLP_RESERVA; return YTDLP; }
     } catch (_) { /* sem internet ou bloqueado: cai na mensagem abaixo */ }
     throw new Error('O yt-dlp (a peça que baixa os vídeos) sumiu e não consegui baixar de novo. ' +
-      'Quase sempre é o antivírus que apagou: libere a pasta do Cortador Automático no antivírus e instale de novo ' +
-      '(baixe o instalador em gabrielworkspace.github.io/cortador-automatico).');
+      'Quase sempre é o antivírus que apagou: libere a pasta do AUTOCORTES Z no antivírus e instale de novo ' +
+      '(baixe o instalador em github.com/OZBITS/autocortes-z).');
   }
   throw new Error('Não encontrei o yt-dlp. Instale com: pip install yt-dlp');
 }
