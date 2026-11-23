@@ -156,6 +156,7 @@ function transcrever(audio, destinoJson, duracao, modelo, idioma, aoProgredir, a
         // modo leve usa metade dos nucleos; total, quase todos
         OMP_NUM_THREADS: process.env.NUM_THREADS || String(desempenho.nucleos()),
         NUM_THREADS: process.env.NUM_THREADS || String(desempenho.nucleos()),
+        USAR_GPU: desempenho.usarCudaNaTranscricao() ? '1' : '0',
       }),
     });
     desempenho.aliviar(p);

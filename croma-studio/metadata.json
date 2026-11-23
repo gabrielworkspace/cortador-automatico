@@ -1,0 +1,6 @@
+{
+  "name": "Croma Studio",
+  "description": "Estúdio para geração de fundos em gradiente, padrões geométricos, thumbnails, banners e marcas d'água para YouTube e redes sociais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

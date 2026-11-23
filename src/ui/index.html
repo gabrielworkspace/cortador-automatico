@@ -834,6 +834,14 @@
 .av-titulo-clipes + .aviso-ia { margin: 0 0 12px; }
 .assinatura .ia { font-size: var(--t6); color: var(--texto3); margin-top: 4px; }
   .sel-resolucao { background: var(--superficie2, #131315); color: var(--texto); border: 1px solid var(--linha2); border-radius: 8px; padding: 4px 8px; font: inherit; font-size: var(--t6); cursor: pointer; }
+
+/* ---------- aba isolada do Croma Studio */
+body[data-modo="croma"] { padding-bottom: 0; overflow: hidden; }
+body[data-modo="croma"] .pagina, body[data-modo="croma"] #acao { display: none !important; }
+#telaCroma { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: var(--topo-h, 62px); z-index: 30; background: #0B0C0F; }
+body[data-modo="croma"] #telaCroma { display: block; }
+#telaCroma iframe { width: 100%; height: 100%; border: 0; display: block; }
+#btnCroma[aria-pressed="true"] { border-color: var(--marca); background: var(--marca-fundo2); color: var(--texto); }
 </style>
 </head>
 <body data-modo="fluxo">
@@ -845,9 +853,11 @@
     <input type="text" id="linkTopo" placeholder="Cole aqui o link da live ou do vídeo · Kick, Twitch ou YouTube" aria-label="Link da live ou do vídeo">
     <button class="btn principal p" id="btnLinkTopo" type="submit">Ir</button>
   </form>
+  <button class="btn p" id="btnCroma" aria-pressed="false" hidden><i data-lucide="palette" class="i"></i> Croma Studio</button>
   <button class="btn p" id="btnProjetos"><i data-lucide="folder-kanban" class="i"></i> Projetos</button>
   <button class="btn p" id="btnAjustes"><i data-lucide="settings-2" class="i"></i> Ajustes</button>
 </div>
+<div id="telaCroma"><iframe id="frameCroma" title="Croma Studio"></iframe></div>
 
 <div class="pagina">
 
@@ -1505,7 +1515,7 @@
       <div class="dica" style="margin-top:8px" id="dspAjustesDica"></div>
       <label class="marcar" style="margin-top:12px">
         <input type="checkbox" id="placaVideo">
-        <div><b>Usar a placa de vídeo pra gerar os cortes</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
+        <div><b>Usar a placa de vídeo (cortes e transcrição)</b><span id="placaDica">Procurando a placa de vídeo...</span></div>
       </label>
     </div>
 
@@ -2498,17 +2508,30 @@
       (r.recomendado === 'leve' ? 'modo leve' : 'processador total') + '. Vale a partir do próximo corte.';
     pintarPlaca(r.placa || {});
   }
-  // placa de video: o programa testa sozinho qual funciona (NVIDIA, AMD ou Intel)
+  // placa de video: mostra em uma linha a GPU detectada e a sigla do corte/transcricao
   function pintarPlaca(p) {
     const caixa = $('placaVideo');
+    const testandoEnc = p.achada === 'testando';
+    const testandoCuda = p.cuda === 'testando';
+    const testando = testandoEnc || testandoCuda;
+    const temEncoder = p.achada && p.achada !== 'testando';
+    const temCuda = p.cuda && p.cuda !== 'testando';
+    const nome = (temCuda ? p.cuda : null) || p.gpu || (temEncoder ? p.achada : null);
     caixa.checked = !!p.ligada;
-    caixa.disabled = p.achada === null;
-    $('placaDica').textContent =
-      p.achada === 'testando' ? 'Testando a placa de vídeo...'
-      : p.achada === null ? 'Não achei placa compatível (NVIDIA, AMD ou Intel): os cortes ficam no processador.'
-      : p.quebrou ? 'A placa ' + p.achada + ' falhou num corte e o programa voltou pro processador. Desligue e ligue de novo pra tentar outra vez.'
-      : 'Encontrei a placa ' + p.achada + '. Gera os cortes até 3x mais rápido; a transcrição continua no processador.';
-    if (p.achada === 'testando') setTimeout(carregarDesempenho, 2000);
+    caixa.disabled = !testando && !temEncoder && !temCuda;
+
+    let texto;
+    if (testando) {
+      texto = nome ? 'GPU detectada: ' + nome + ' · Verificando...' : 'Verificando GPU...';
+    } else if (!temEncoder && !temCuda) {
+      texto = 'Nenhuma GPU compatível · Transcrição: CPU · Corte: CPU';
+    } else {
+      const corte = p.quebrou ? 'CPU' : (p.sigla || 'CPU');
+      const transc = temCuda ? 'CUDA' : 'CPU';
+      texto = 'GPU detectada: ' + nome + ' · Transcrição: ' + transc + ' · Corte: ' + corte;
+    }
+    $('placaDica').textContent = texto;
+    if (testando) setTimeout(carregarDesempenho, 1000);
   }
   $('placaVideo').addEventListener('change', async () => {
     try {
@@ -4403,6 +4426,29 @@
   $('btnNovo').addEventListener('click', () => {
     irPara(projetoAtual && projetoAtual.recem && arquivo ? 3 : 1);
   });
+
+  // Croma Studio (aba isolada em iframe, lazy-load; so aparece se o build existir em /croma/)
+  let modoAntesCroma = 'fluxo';
+  function abrirCroma(ligar) {
+    const ativo = document.body.dataset.modo === 'croma';
+    const proximo = typeof ligar === 'boolean' ? ligar : !ativo;
+    if (proximo === ativo) return;
+    if (proximo) {
+      modoAntesCroma = document.body.dataset.modo || 'fluxo';
+      const topo = document.querySelector('.topo');
+      if (topo) document.documentElement.style.setProperty('--topo-h', topo.offsetHeight + 'px');
+      const frame = $('frameCroma');
+      if (!frame.getAttribute('src')) frame.src = '/croma/';
+      document.body.dataset.modo = 'croma';
+    } else {
+      document.body.dataset.modo = modoAntesCroma === 'croma' ? 'fluxo' : modoAntesCroma;
+    }
+    $('btnCroma').setAttribute('aria-pressed', String(proximo));
+  }
+  fetch('/croma/').then((r) => { if (r.ok) $('btnCroma').hidden = false; }).catch(() => {});
+  $('btnCroma').addEventListener('click', () => abrirCroma());
+  $('btnProjetos').addEventListener('click', () => { if (document.body.dataset.modo === 'croma') abrirCroma(false); });
+  $('formLinkTopo').addEventListener('submit', () => { if (document.body.dataset.modo === 'croma') abrirCroma(false); });
 
   resumo();
   icones();

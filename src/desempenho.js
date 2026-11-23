@@ -88,38 +88,123 @@ function argsDoFfmpeg(args) {
 //
 // Gerar o corte (recodificar o video) e a parte pesada do fim. A placa de video
 // faz isso bem mais rapido que o processador: NVIDIA (NVENC), AMD (AMF) ou Intel
-// (Quick Sync). A transcricao continua no processador.
+// (Quick Sync). Ja a transcricao (faster-whisper) pode rodar em CUDA em qualquer
+// GPU NVIDIA compativel - mesmo em placas sem NVENC.
 
 const PLACAS = [
-  { encoder: 'h264_nvenc', nome: 'NVIDIA' },
-  { encoder: 'h264_amf', nome: 'AMD' },
-  { encoder: 'h264_qsv', nome: 'Intel' },
+  { encoder: 'h264_nvenc', nome: 'NVIDIA', sigla: 'NVENC' },
+  { encoder: 'h264_amf', nome: 'AMD', sigla: 'AMF' },
+  { encoder: 'h264_qsv', nome: 'Intel', sigla: 'QSV' },
 ];
 let placaAchada; // undefined = ainda nao testou; null = nenhuma funcionou
 let testando = null;
 let placaQuebrou = false; // falhou num corte de verdade: volta pro processador ate fechar
 
+let cudaAchada; // undefined = ainda nao testou; null = sem CUDA utilizavel; { nome, computeType }
+let testandoCuda = null;
+let gpuNome = null; // preenchido rapido pelo nvidia-smi (~100ms) antes dos testes terminarem
+
 /** Testa de verdade (um video de meio segundo) qual placa o ffmpeg consegue usar. */
 function detectarPlaca(ffmpeg) {
   if (placaAchada !== undefined) return Promise.resolve(placaAchada);
+  if (!ffmpeg) { placaAchada = null; return Promise.resolve(null); }
   if (testando) return testando;
   const { spawn } = require('child_process');
   const testar = (p) => new Promise((ok) => {
-    const proc = spawn(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=640x360:r=30:d=0.5',
-      '-c:v', p.encoder, '-pix_fmt', p.encoder === 'h264_qsv' ? 'nv12' : 'yuv420p', '-f', 'null', '-'], { windowsHide: true });
-    const relogio = setTimeout(() => { try { proc.kill(); } catch (_) {} ok(false); }, 15000);
+    let proc;
+    try {
+      proc = spawn(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=640x360:r=30:d=0.5',
+        '-c:v', p.encoder, '-pix_fmt', p.encoder === 'h264_qsv' ? 'nv12' : 'yuv420p', '-f', 'null', '-'], { windowsHide: true });
+    } catch (_) { return ok(false); }
+    const relogio = setTimeout(() => { try { proc.kill(); } catch (_) {} ok(false); }, 6000);
     proc.on('error', () => { clearTimeout(relogio); ok(false); });
     proc.on('close', (code) => { clearTimeout(relogio); ok(code === 0); });
   });
   testando = (async () => {
-    for (const p of PLACAS) if (await testar(p)) { placaAchada = p; return p; }
+    try {
+      // Testa NVENC, AMF e QSV em paralelo e escolhe o primeiro disponivel na
+      // ordem de prioridade (NVIDIA > AMD > Intel). Assim o programa aproveita
+      // todos os recursos disponiveis: CUDA + NVENC, CUDA + QSV/AMF, ou apenas
+      // o que estiver disponivel na maquina, mantendo o restante na CPU.
+      const resultados = await Promise.all(PLACAS.map((p) => testar(p)));
+      const idx = resultados.indexOf(true);
+      if (idx >= 0) { placaAchada = PLACAS[idx]; return placaAchada; }
+    } catch (_) {}
     placaAchada = null;
     return null;
   })();
   return testando;
 }
 
+/** Nome da GPU NVIDIA via nvidia-smi (ex.: "NVIDIA GeForce GTX 1070"), ou null se nao houver. */
+function nomeGpuNvidia() {
+  const { spawn } = require('child_process');
+  return new Promise((resolve) => {
+    let proc;
+    try {
+      proc = spawn('nvidia-smi', ['--query-gpu=name,compute_cap', '--format=csv,noheader'], { windowsHide: true });
+    } catch (_) { return resolve(null); }
+    let out = '';
+    const relogio = setTimeout(() => { try { proc.kill(); } catch (_) {} resolve(null); }, 5000);
+    proc.stdout.setEncoding('utf8');
+    proc.stdout.on('data', (d) => { out += d; });
+    proc.on('error', () => { clearTimeout(relogio); resolve(null); });
+    proc.on('close', (code) => {
+      clearTimeout(relogio);
+      if (code !== 0) return resolve(null);
+      const linha = out.split(/\r?\n/).map((l) => l.trim()).find(Boolean);
+      if (!linha) return resolve(null);
+      const partes = linha.split(',').map((s) => s.trim());
+      resolve(partes[0] || 'NVIDIA');
+    });
+  });
+}
+
+/** Testa de verdade se o ctranslate2 (faster-whisper) consegue usar CUDA nesta maquina. */
+function detectarCuda(pythonBin) {
+  if (cudaAchada !== undefined) return Promise.resolve(cudaAchada);
+  if (testandoCuda) return testandoCuda;
+  const path = require('path');
+  const { spawn } = require('child_process');
+  const script = path.join(__dirname, '..', 'py', 'transcrever.py');
+
+  testandoCuda = (async () => {
+    try {
+      const nome = await nomeGpuNvidia();
+      if (nome) gpuNome = nome;
+      if (!nome || !pythonBin) { cudaAchada = null; return null; }
+      const res = await new Promise((resolve) => {
+        let proc;
+        try {
+          proc = spawn(pythonBin, [script, '--testar-cuda'], { windowsHide: true });
+        } catch (_) { return resolve(null); }
+        let out = '';
+        const relogio = setTimeout(() => { try { proc.kill(); } catch (_) {} resolve(null); }, 20000);
+        proc.stdout.setEncoding('utf8');
+        proc.stdout.on('data', (d) => { out += d; });
+        proc.on('error', () => { clearTimeout(relogio); resolve(null); });
+        proc.on('close', (code) => {
+          clearTimeout(relogio);
+          if (code !== 0) return resolve(null);
+          try {
+            const linha = out.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.startsWith('{')).pop();
+            resolve(linha ? JSON.parse(linha) : null);
+          } catch (_) { resolve(null); }
+        });
+      });
+      if (res && res.cuda) {
+        cudaAchada = { nome, computeType: res.compute_type || 'float32' };
+        return cudaAchada;
+      }
+    } catch (_) {}
+    cudaAchada = null;
+    return null;
+  })();
+  return testandoCuda;
+}
+
 function placaLigada() { return !!pastas.lerConfig().placaVideo; }
+function usarCudaNaTranscricao() { return placaLigada() && !!cudaAchada; }
 function definirPlaca(ligada) {
   const cfg = pastas.lerConfig();
   cfg.placaVideo = !!ligada;
@@ -169,8 +254,19 @@ function adaptarFfmpeg(args) {
 function resumo() {
   return {
     modo: modo(), escolhido: escolhido(), recomendado: recomendado(), pc: pc(),
-    placa: { ligada: placaLigada(), achada: placaAchada === undefined ? 'testando' : (placaAchada ? placaAchada.nome : null), quebrou: placaQuebrou },
+    placa: {
+      ligada: placaLigada(),
+      achada: placaAchada === undefined ? 'testando' : (placaAchada ? placaAchada.nome : null),
+      sigla: placaAchada ? placaAchada.sigla : null,
+      quebrou: placaQuebrou,
+      gpu: gpuNome,
+      cuda: cudaAchada === undefined ? 'testando' : (cudaAchada ? cudaAchada.nome : null),
+      computeType: cudaAchada ? cudaAchada.computeType : null,
+    },
   };
 }
 
-module.exports = { modo, escolhido, definir, pc, recomendado, nucleos, aliviar, argsDoFfmpeg, adaptarFfmpeg, detectarPlaca, definirPlaca, marcarPlacaQuebrada, resumo };
+module.exports = {
+  modo, escolhido, definir, pc, recomendado, nucleos, aliviar, argsDoFfmpeg,
+  adaptarFfmpeg, detectarPlaca, detectarCuda, usarCudaNaTranscricao, definirPlaca, marcarPlacaQuebrada, resumo,
+};
