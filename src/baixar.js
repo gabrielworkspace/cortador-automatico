@@ -55,7 +55,7 @@ function testar(cmd) {
 /** Baixa o yt-dlp.exe oficial (GitHub do yt-dlp) pra pasta reserva. */
 async function baixarYtDlpReserva() {
   fs.mkdirSync(PASTA_RESERVA, { recursive: true });
-  const r = await fetch(URL_YTDLP, { redirect: 'follow', signal: AbortSignal.timeout(180000) });
+  const r = await fetch(URL_YTDLP, { redirect: 'follow', signal: AbortSignal.timeout(900000) }); // 15 min: cabe ate internet bem lenta
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const dados = Buffer.from(await r.arrayBuffer());
   if (dados.length < 1000000) throw new Error('arquivo incompleto');
@@ -280,7 +280,8 @@ function mensagemDeErro(bruto) {
            'com o video aberto (na Kick fica assim: kick.com/canal/videos/...).';
   }
   if (/HTTP Error 4\d\d/i.test(t)) return 'O site recusou o download desse video.';
-  if (/urlopen error|getaddrinfo|network|Name or service not known|Failed to resolve/i.test(t)) return 'Sem conexão com a internet. Confira o Wi-Fi ou o cabo e tente de novo.';
+  // Texto exato: as regras de nova tentativa (IPv6) e semJeito procuram "Sem conexao" sem acento
+  if (/urlopen error|getaddrinfo|network/i.test(t)) return 'Sem conexao com a internet.';
   if (/timed out|Read timed out|Connection reset|Connection aborted|Remote end closed|IncompleteRead|10054|10060|SSL/i.test(t)) {
     return 'A internet caiu ou ficou lenta no meio do download. Tente de novo: ele continua de onde parou.';
   }
