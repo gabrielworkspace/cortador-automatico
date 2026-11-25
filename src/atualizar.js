@@ -291,7 +291,12 @@ async function aplicarAtualizacao() {
   fs.mkdirSync(pastaExtraida, { recursive: true });
 
   try {
-    const r = await fetch(URL_PACOTE_CODIGO + '?t=' + Date.now(), {
+    // Baixa exatamente o commit que foi conferido (e nao o que estiver na main no instante do download)
+    const shaAlvo = commitInfo && /^[0-9a-f]{40}$/i.test(commitInfo.sha || '') ? commitInfo.sha : '';
+    const urlPacote = shaAlvo
+      ? 'https://codeload.github.com/gabrielworkspace/cortador-automatico/tar.gz/' + shaAlvo
+      : URL_PACOTE_CODIGO + '?t=' + Date.now();
+    const r = await fetch(urlPacote, {
       redirect: 'follow',
       headers: { 'Cache-Control': 'no-cache' },
       signal: AbortSignal.timeout(45000),
