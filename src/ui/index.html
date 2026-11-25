@@ -3043,6 +3043,9 @@
       if (r.cancelou) return;
       // a janela do Windows falhou: daqui pra frente usa o seletor do proprio programa
       temDialogoNativo = false;
+      // A janela pode ter ficado escondida e so "falhar" minutos depois (tempo esgotado),
+      // quando a pessoa ja escolheu o video de outro jeito: ai o aviso so confunde.
+      if (processandoAgora || telaAtual !== 1) return;
       return erro('Não consegui abrir o vídeo pela janela do Windows. Clique de novo em "Escolher um vídeo" (vai abrir outro seletor) ou arraste o vídeo pra cá.');
     }
     $('arquivoReal').click();

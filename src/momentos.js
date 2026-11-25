@@ -133,12 +133,16 @@ function marcarSuspense(picos, wav) {
  */
 function mudancasDeCena(ffmpeg, video, aoProgredir, duracaoTotal) {
   return new Promise((resolve) => {
-    const args = [
+    // Video longo (live inteira): le so os quadros-chave. Medido numa live 1080p:
+    // ~24x mais rapido e praticamente as mesmas cenas. Sem isso uma live de 4h
+    // ficava quase uma hora nesta etapa.
+    const soChave = (duracaoTotal || 0) > 1200;
+    const args = (soChave ? ['-skip_frame', 'nokey'] : []).concat([
+      '-loglevel', 'info',
       '-i', video,
       '-filter:v', "scale=160:-2,fps=5,select='gt(scene,0.22)',showinfo",
       '-an', '-f', 'null', '-',
-      '-loglevel', 'info',
-    ];
+    ]);
 
     const p = spawn(ffmpeg, args, { windowsHide: true });
     desempenho.aliviar(p);
@@ -149,7 +153,8 @@ function mudancasDeCena(ffmpeg, video, aoProgredir, duracaoTotal) {
 
     p.stderr.on('data', (d) => {
       resto += d.toString();
-      const linhas = resto.split(/\r?\n/);
+      // o ffmpeg escreve o progresso (time=...) terminando so com \r
+      const linhas = resto.split(/\r\n|\r|\n/);
       resto = linhas.pop();
       for (const l of linhas) {
         const m = /pts_time:([\d.]+)/.exec(l);
