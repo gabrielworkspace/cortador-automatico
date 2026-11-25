@@ -60,13 +60,25 @@ def main():
     )
 
     # int8 no CPU: bem mais rapido e cabe folgado na RAM.
-    modelo = WhisperModel(
-        args.modelo,
-        device="cpu",
-        compute_type="int8",
-        cpu_threads=threads,
-        download_root=pasta_modelos,
-    )
+    # Primeiro so do disco: o modelo ja vem no instalador, e com internet ruim a
+    # checagem no HuggingFace atrasava (ou travava) o comeco de toda transcricao.
+    try:
+        modelo = WhisperModel(
+            args.modelo,
+            device="cpu",
+            compute_type="int8",
+            cpu_threads=threads,
+            download_root=pasta_modelos,
+            local_files_only=True,
+        )
+    except Exception:
+        modelo = WhisperModel(
+            args.modelo,
+            device="cpu",
+            compute_type="int8",
+            cpu_threads=threads,
+            download_root=pasta_modelos,
+        )
 
     avisar("progresso", pct=6, msg="Ouvindo o video inteiro...")
 

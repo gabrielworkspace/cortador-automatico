@@ -4687,8 +4687,9 @@
       fim: async (d) => {
         const usouIaNesteJob = cfg.motor === 'ia' && !(trechoFluxo && trechoFluxo.modo === 'exato');
         processandoAgora = false;
-        await carregarEstadoPro(true);
+        // Abre os cortes primeiro: sem internet, o estado do Pro pode demorar e a pessoa ficaria esperando a toa
         await abrirProjeto(d.pasta, { recem: true, recado: d.recado, clipes: d.clipes });
+        await carregarEstadoPro(true);
         try { atualizarAtalhoProjetosSalvos(); } catch (_) {}
         atualizarCardSugestaoResultado(d.clipes);
         if (usouIaNesteJob) {
@@ -4696,6 +4697,11 @@
         }
       },
       erro: (m) => { voltar(); erro(m); },
+      caiu: () => {
+        if (!processandoAgora) return;
+        voltar();
+        erro('Perdi o contato com o programa no meio do processo. Se a janela preta continua aberta, os cortes aparecem em Projetos quando terminar.');
+      },
     });
   }
 

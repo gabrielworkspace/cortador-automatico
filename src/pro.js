@@ -129,7 +129,15 @@ async function chamarWorker(caminho, metodo, corpo, timeoutMs) {
     signal: AbortSignal.timeout(timeoutMs || 15000),
   };
   if (corpo) opcoes.body = JSON.stringify(corpo);
-  const r = await fetch(base + caminho, opcoes);
+  let r;
+  try {
+    r = await fetch(base + caminho, opcoes);
+  } catch (e) {
+    const demorou = e && (e.name === 'TimeoutError' || e.name === 'AbortError');
+    throw new Error(demorou
+      ? 'O servidor do Cortador Pro demorou demais para responder. Confira sua internet e tente de novo.'
+      : 'Sem conexão com o servidor do Cortador Pro. Confira sua internet e tente de novo.');
+  }
   let dados = null;
   try { dados = await r.json(); } catch (_) {}
   if (!r.ok) {

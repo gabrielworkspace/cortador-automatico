@@ -4,12 +4,12 @@
   "precisaInstalador": false,
   "proApiUrl": "https://cortador-pro.gabrielhraa.workers.dev",
   "aviso": {
-    "id": "instagram-duvidas-v1",
+    "id": "correcoes-internet-2026-11-25",
     "ativo": true,
-    "tipo": "info",
-    "titulo": "Alguma dúvida ou sugestão?",
-    "texto": "Siga @gabriel.workspace no Instagram para acompanhar as novidades e mandar qualquer dúvida por lá.",
-    "botaoTexto": "Seguir no Instagram",
+    "tipo": "novidade",
+    "titulo": "Atualização: o Cortador ficou mais estável",
+    "texto": "Corrigimos falhas de quando a internet cai ou fica lenta: se o Diretor IA Pro não responder, os cortes saem pelo Motor Local e você não perde o trabalho. Os cortes aparecem mais rápido no final, a transcrição não depende mais da internet e as mensagens de erro ficaram mais claras. Estamos trabalhando para deixar o projeto cada vez melhor. Ideias e sugestões? Manda no meu Instagram @gabriel.workspace.",
+    "botaoTexto": "Enviar sugestão no Instagram",
     "botaoUrl": "https://www.instagram.com/gabriel.workspace/",
     "fixo": false
   }

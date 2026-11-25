@@ -368,21 +368,29 @@ async function processar(opcoes, avisar) {
     const pro = require('./pro');
     const ctxVid = contextoDoVideo(video);
     emitir(64, 'analise', 'Diretor IA Pro lendo a conversa inteira e criando títulos virais...');
-    const resIa = await pro.analisarComIa(transcricao, picos, info.duracao, {
-      quantidade: opcoes.quantidade || 8,
-      minDur: opcoes.minDur || 28,
-      maxDur: opcoes.maxDur || 62,
-      descricao: opcoes.descricao,
-      contexto: ctxVid.texto,
-      canal: ctxVid.canal,
-      trecho: trecho,
-    });
-    cortes = resIa.cortes;
-    feitoComIa = true;
-    if (resIa.usouTrial) {
-      avisar({ tipo: 'aviso', msg: '✨ Diretor IA Pro usado! Você ainda tem ' + resIa.trialsRestantes + ' teste(s) grátis.' });
+    try {
+      const resIa = await pro.analisarComIa(transcricao, picos, info.duracao, {
+        quantidade: opcoes.quantidade || 8,
+        minDur: opcoes.minDur || 28,
+        maxDur: opcoes.maxDur || 62,
+        descricao: opcoes.descricao,
+        contexto: ctxVid.texto,
+        canal: ctxVid.canal,
+        trecho: trecho,
+      });
+      cortes = resIa.cortes;
+      feitoComIa = true;
+      if (resIa.usouTrial) {
+        avisar({ tipo: 'aviso', msg: '✨ Diretor IA Pro usado! Você ainda tem ' + resIa.trialsRestantes + ' teste(s) grátis.' });
+      }
+    } catch (e) {
+      // Internet caiu, servidor fora ou cota acabou: a transcricao ja esta pronta,
+      // entao em vez de perder tudo, o Motor Local faz os cortes.
+      avisar({ tipo: 'aviso', msg: 'O Diretor IA Pro não respondeu (' + String((e && e.message) || 'erro').slice(0, 160) + '). Fiz os cortes com o Motor Local para você não perder o trabalho.' });
+      cortes = null;
     }
-  } else {
+  }
+  if (!cortes && !exato) {
     emitir(64, 'analise', trecho
       ? 'Procurando os melhores momentos entre ' + mmss(trecho.inicio) + ' e ' + mmss(trecho.fim) + '...'
       : 'Procurando os melhores momentos...');
