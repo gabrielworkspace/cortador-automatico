@@ -174,6 +174,9 @@ async function resolverAoVivo(url) {
         try { return await resolverAoVivoUma(url, e, true); } catch (err2) { err = err2; }
       }
       ultimo = err;
+      // Navegador nao instalado ou cookies ilegiveis (ex: "could not find firefox
+      // cookies database"): nao e o erro da live, so pula pro proximo navegador.
+      if (e.length && /cookie|browser|firefox|chrome|edge|decrypt|DPAPI|keyring|profile/i.test(err.message)) continue;
       if (!/sign in|not a bot|confirm/i.test(err.message)) throw err;
     }
   }

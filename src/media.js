@@ -136,18 +136,27 @@ function eval2(fracao) {
 /** Extrai audio 16kHz mono - formato que o Whisper quer e que da pra medir energia. */
 async function extrairAudio(video, destino, duracao, aoProgredir) {
   const { ffmpeg } = await garantirFfmpeg();
-  await rodar(ffmpeg, [
-    '-y', '-i', video,
-    '-vn', '-ac', '1', '-ar', '16000',
-    '-c:a', 'pcm_s16le',
-    '-progress', 'pipe:1', '-nostats',
-    '-loglevel', 'error',
-    destino,
-  ], {
-    aoProgredir: (seg) => {
-      if (aoProgredir && duracao > 0) aoProgredir(Math.min(1, seg / duracao));
-    },
-  });
+  // Grava num arquivo provisorio e so renomeia no fim: se a extracao falhar ou o
+  // programa fechar no meio, nao sobra um .wav quebrado pra ser "reaproveitado" depois.
+  const provisorio = destino + '.parcial';
+  try {
+    await rodar(ffmpeg, [
+      '-y', '-i', video,
+      '-vn', '-ac', '1', '-ar', '16000',
+      '-c:a', 'pcm_s16le',
+      '-progress', 'pipe:1', '-nostats',
+      '-loglevel', 'error',
+      '-f', 'wav', provisorio,
+    ], {
+      aoProgredir: (seg) => {
+        if (aoProgredir && duracao > 0) aoProgredir(Math.min(1, seg / duracao));
+      },
+    });
+    fs.renameSync(provisorio, destino);
+  } catch (e) {
+    try { fs.unlinkSync(provisorio); } catch (_) {}
+    throw e;
+  }
   return destino;
 }
 

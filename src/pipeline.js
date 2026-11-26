@@ -211,6 +211,20 @@ function transcrever(audio, destinoJson, duracao, modelo, idioma, aoProgredir, a
  *
  * @returns {Promise<object>} { info, assinatura, wav, jsonTranscricao, transcricao, energia, picos }
  */
+/** O .wav guardado presta? (cabecalho RIFF/WAVE e pelo menos ~1 s de som) */
+function wavUtilizavel(wav) {
+  try {
+    if (fs.statSync(wav).size < 44 + 32000) return false;
+    const fd = fs.openSync(wav, 'r');
+    const cab = Buffer.alloc(12);
+    fs.readSync(fd, cab, 0, 12, 0);
+    fs.closeSync(fd);
+    return cab.toString('ascii', 0, 4) === 'RIFF' && cab.toString('ascii', 8, 12) === 'WAVE';
+  } catch (_) {
+    return false;
+  }
+}
+
 async function prepararAnalise(video, opcoes, emitir, avisar) {
   fs.mkdirSync(pastas.trabalho(), { recursive: true });
 
@@ -240,6 +254,11 @@ async function prepararAnalise(video, opcoes, emitir, avisar) {
   const jsonTranscricao = path.join(pastas.trabalho(), assinatura + '-' + (opcoes.modelo || 'small') + '-' + idiomaCache + '-v3.json');
 
   // ---- 2. audio
+  // Um .wav vazio ou so com cabecalho (sobra de uma extracao que falhou) fazia
+  // toda tentativa seguinte dar "Invalid data found". Esse nao vale: refaz.
+  if (fs.existsSync(wav) && !wavUtilizavel(wav)) {
+    try { fs.unlinkSync(wav); } catch (_) { }
+  }
   if (!fs.existsSync(wav)) {
     emitir(2, 'audio', 'Separando o audio do video...');
     await media.extrairAudio(video, wav, info.duracao, (frac) => {
